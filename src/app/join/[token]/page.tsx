@@ -16,12 +16,24 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  // Reading the invite needs an authenticated caller — the rules deliberately
+  // do not expose invite documents to the world. So wait until sign-in has
+  // resolved before looking it up; attempting it while signed out comes back
+  // permission-denied and would be reported as an invalid token.
   useEffect(() => {
-    if (!configured) return;
+    if (!configured || loading || !user) return;
+    let cancelled = false;
     readInvite(token)
-      .then(setState)
-      .catch(() => setState({ ok: false, reason: 'missing' }));
-  }, [token, configured]);
+      .then((s) => {
+        if (!cancelled) setState(s);
+      })
+      .catch(() => {
+        if (!cancelled) setState({ ok: false, reason: 'missing' });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, configured, loading, user]);
 
   const join = useCallback(async () => {
     if (!state?.ok || !profile) return;
@@ -50,7 +62,30 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
     );
   }
 
-  if (loading || state === null) {
+  if (loading) {
+    return (
+      <div className="centre">
+        <div className="spin" />
+      </div>
+    );
+  }
+
+  // Signed out: prompt first, validate the invite once we can actually read it.
+  // `next` carries the invite through the email round-trip and back to here.
+  if (!user) {
+    return (
+      <Shell title="You have been invited">
+        <p className="lead">
+          Sign in to accept this invitation. You will come straight back here afterwards.
+        </p>
+        <Link className="btn pri" href={`/login?next=${encodeURIComponent(`/join/${token}`)}`}>
+          Sign in to continue
+        </Link>
+      </Shell>
+    );
+  }
+
+  if (state === null) {
     return (
       <div className="centre">
         <div className="spin" />
@@ -77,21 +112,6 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
   }
 
   const roleLabel = ROLES.find((r) => r.key === state.invite.role)?.label ?? state.invite.role;
-
-  // Not signed in yet — send them through the email link, then straight back here.
-  if (!user) {
-    return (
-      <Shell title={`Join ${state.invite.workspaceName}`}>
-        <p className="lead">
-          You have been invited as <b>{roleLabel}</b>. Sign in first and you will land straight in
-          the calendar.
-        </p>
-        <Link className="btn pri" href={`/login?next=${encodeURIComponent(`/join/${token}`)}`}>
-          Sign in to continue
-        </Link>
-      </Shell>
-    );
-  }
 
   return (
     <Shell title={`Join ${state.invite.workspaceName}`}>

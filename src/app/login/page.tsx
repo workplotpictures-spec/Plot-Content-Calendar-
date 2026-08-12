@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { useAuth } from '@/lib/auth-context';
+import { takeStoredNext, useAuth } from '@/lib/auth-context';
+import { safePath } from '@/lib/utils';
 import { useToast } from '@/components/Toasts';
 
 type Stage = 'form' | 'sent' | 'completing' | 'need-email';
@@ -14,7 +15,7 @@ function LoginInner() {
   const params = useSearchParams();
   const toast = useToast();
 
-  const next = params.get('next') || '/';
+  const next = safePath(params.get('next'));
   const [email, setEmail] = useState('');
   const [stage, setStage] = useState<Stage>('form');
   const [busy, setBusy] = useState(false);
@@ -39,9 +40,13 @@ function LoginInner() {
     };
   }, [configured, completeLink]);
 
-  // Once signed in, leave for wherever we were headed.
+  // Once signed in, leave for wherever we were headed. The query string wins;
+  // the stored copy covers a link whose params got rewritten in transit.
+  const redirected = useRef(false);
   useEffect(() => {
-    if (!loading && user) router.replace(next);
+    if (loading || !user || redirected.current) return;
+    redirected.current = true;
+    router.replace(next ?? takeStoredNext() ?? '/');
   }, [loading, user, next, router]);
 
   if (!configured) {
@@ -70,7 +75,7 @@ function LoginInner() {
         await completeLinkWithEmail(email);
         setStage('completing');
       } else {
-        await sendLink(email);
+        await sendLink(email, next ?? undefined);
         setStage('sent');
       }
     } catch (e) {
