@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Content Calendar</title>
+<style>
+:root{
+  --navy:#0B1F3F; --royal:#2C5FE0; --royal-dark:#1E45B0;
+  --light-blue:#E4EDFF; --pale:#F7F9FE; --surface:#fff;
+  --border:#E3E8F3; --text:#16223D; --soft:#5B6786; --faint:#9BA6C0;
+  --sh-sm:0 1px 2px rgba(16,36,84,.05); --sh:0 8px 24px rgba(16,36,84,.09);
+  --sh-lg:0 20px 60px rgba(16,36,84,.18); --r:14px; --r-sm:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  background:var(--pale); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* ---------- header ---------- */
+.hdr{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--royal),var(--navy));
+  color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-sm)}
+.logo h1{font-size:15px;font-weight:700;margin:0;letter-spacing:-.2px}
+.logo p{margin:0;font-size:11px;color:var(--faint)}
+.search{position:relative;flex:1;min-width:200px;max-width:420px}
+.search input[type=text]{width:100%;height:36px;border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:0 30px 0 34px;background:#fff;box-shadow:var(--sh-sm);outline:none;font-size:13px}
+.search input:focus{border-color:var(--royal);box-shadow:0 0 0 3px rgba(44,95,224,.15)}
+.search svg{position:absolute;left:10px;top:10px;width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:2}
+.search .clr{position:absolute;right:6px;top:6px;border:0;background:none;color:var(--faint);padding:4px;border-radius:6px;line-height:0}
+.spacer{margin-left:auto}
+.seg{display:flex;gap:2px;background:#EEF2FA;padding:4px;border-radius:12px}
+.seg button{border:0;background:none;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:500;color:var(--soft)}
+.seg button.on{background:#fff;color:var(--text);box-shadow:var(--sh-sm)}
+.btn{border:1px solid var(--border);background:#fff;color:var(--text);border-radius:var(--r-sm);
+  padding:7px 12px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px;box-shadow:var(--sh-sm)}
+.btn:hover{background:#F8FAFF}
+.btn.pri{background:var(--royal);border-color:var(--royal);color:#fff}
+.btn.pri:hover{background:var(--royal-dark)}
+.btn.ghost{border-color:transparent;background:none;box-shadow:none}
+.btn.ghost:hover{background:#F1F5FD}
+.btn.danger{color:#DC2626;border-color:transparent;background:none;box-shadow:none}
+.btn.danger:hover{background:#FEF2F2}
+.btn.sm{padding:5px 9px;font-size:12px}
+.icobtn{border:0;background:none;padding:8px;border-radius:9px;color:var(--soft);position:relative;line-height:0}
+.icobtn:hover{background:#F1F5FD}
+.dot-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:9px;background:#DC2626;
+  color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--light-blue);color:var(--royal-dark);
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid #fff;box-shadow:var(--sh-sm)}
+
+.demo-note{background:#FFFBEB;border-bottom:1px solid #FDE68A;color:#92400E;font-size:11.5px;
+  padding:6px 20px;display:flex;align-items:center;gap:8px;justify-content:center}
+.demo-note a{color:#92400E;font-weight:600}
+
+/* ---------- layout ---------- */
+main{max-width:1480px;margin:0 auto;padding:18px 20px 60px}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0 12px}
+.toolbar h2{margin:0 0 0 6px;font-size:18px;font-weight:650;letter-spacing:-.3px}
+.count{font-size:11px;color:var(--faint)}
+.count.act{background:var(--light-blue);color:var(--royal-dark);font-weight:600;padding:4px 9px;border-radius:99px}
+
+/* ---------- goals ---------- */
+.goals{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-sm);overflow:hidden}
+.goals-hd{display:flex;align-items:center;gap:10px;padding:11px 14px}
+.goals-hd .ic{width:32px;height:32px;border-radius:9px;background:var(--light-blue);color:var(--royal);
+  display:flex;align-items:center;justify-content:center}
+.goals-hd b{font-size:13.5px;display:block}
+.goals-hd span{font-size:11.5px;color:var(--faint)}
+.saved{font-size:11px;color:#16A34A;margin-left:auto;opacity:0;transition:opacity .2s}
+.saved.show{opacity:1}
+.editor{border-top:1px solid var(--border)}
+.etools{display:flex;gap:2px;padding:6px 10px;background:#FAFBFF;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.etools button{border:0;background:none;padding:5px 7px;border-radius:6px;color:var(--soft);font-size:12px;font-weight:600;min-width:26px}
+.etools button:hover{background:#fff;box-shadow:var(--sh-sm);color:var(--text)}
+.rt{padding:12px 14px;min-height:80px;outline:none;font-size:13.5px;line-height:1.65;color:#334155}
+.rt:empty:before{content:attr(data-ph);color:var(--faint)}
+.rt ul,.rt ol{margin:6px 0;padding-left:20px}
+.rt a{color:var(--royal)}
+
+/* ---------- month grid ---------- */
+.cal{background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm)}
+.wk-hd{display:grid;grid-template-columns:repeat(7,1fr);background:#FAFBFF;border-bottom:1px solid var(--border)}
+.wk-hd div{padding:9px 6px;text-align:center;font-size:10.5px;font-weight:700;letter-spacing:.6px;color:var(--soft);text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cell{min-height:132px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:6px;display:flex;flex-direction:column;background:#fff}
+.grid .cell:nth-child(7n){border-right:0}
+.cell.out{background:#FBFCFE}
+.cell.drop{background:rgba(44,95,224,.07);box-shadow:inset 0 0 0 2px rgba(44,95,224,.4)}
+.cell-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.daynum{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:650;color:#334155}
+.cell.out .daynum{color:#CBD5E1}
+.daynum.today{background:var(--royal);color:#fff;box-shadow:var(--sh-sm)}
+.cell-tools{display:flex;align-items:center;gap:4px}
+.pill{background:#F1F5F9;color:var(--soft);font-size:10px;font-weight:700;border-radius:99px;padding:1px 6px}
+.add{border:0;background:none;color:var(--faint);width:20px;height:20px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;opacity:0;transition:.15s}
+.cell:hover .add,.wcol:hover .add{opacity:1}
+.add:hover{background:var(--royal);color:#fff}
+.stack{display:flex;flex-direction:column;gap:4px;overflow-y:auto;max-height:240px;flex:1}
+.stack::-webkit-scrollbar{width:5px}
+.stack::-webkit-scrollbar-thumb{background:#D5DCEA;border-radius:9px}
+
+/* ---------- tiles ---------- */
+.tile{border:1px solid #E7EBF4;border-left:3px solid #CBD5E1;background:#fff;border-radius:9px;
+  padding:6px 7px;cursor:pointer;box-shadow:var(--sh-sm);transition:box-shadow .15s,transform .1s}
+.tile:hover{box-shadow:var(--sh)}
+.tile.dragging{opacity:.45}
+.tile-top{display:flex;align-items:flex-start;gap:5px}
+.grip{flex:0 0 auto;margin-top:1px;padding:1px;border-radius:4px;line-height:0;color:#C6CEDE;
+  cursor:grab;opacity:0;transition:opacity .15s,color .15s}
+.tile:hover .grip{opacity:1}
+.grip:hover{color:var(--soft);background:rgba(15,23,42,.05)}
+.grip:active{cursor:grabbing}
+@media(hover:none){.grip{opacity:.55}}
+.tile-title{font-size:11.5px;font-weight:550;line-height:1.35;flex:1;word-break:break-word;color:#1E293B}
+.sdot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;margin-top:3px}
+.tile-meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;font-size:9.5px;color:var(--soft);align-items:center}
+.chip{background:#F1F5F9;border-radius:4px;padding:1px 5px;font-weight:600;color:#475569;max-width:104px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.out{background:#fff;border:1px solid #E7EBF4;color:var(--soft);font-weight:500}
+.due{display:inline-flex;align-items:center;gap:2px}
+.due.late{color:#DC2626;font-weight:700}
+.tile.full .tile-title{font-size:13px}
+.tile.full{padding:9px 10px}
+.who{display:flex;align-items:center;gap:6px;margin-top:7px}
+.who i{width:18px;height:18px;border-radius:50%;color:#fff;font-size:9px;font-weight:800;font-style:normal;
+  display:flex;align-items:center;justify-content:center}
+.who span{font-size:11px;font-weight:550;color:var(--soft)}
+.badge{margin-left:auto;font-size:10px;font-weight:600;border-radius:99px;padding:2px 7px;border:1px solid}
+
+/* ---------- week ---------- */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.wcol{background:#fff;border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column;min-height:240px}
+.wcol.drop{box-shadow:inset 0 0 0 2px rgba(44,95,224,.45)}
+.wcol-hd{padding:9px 11px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.wcol-hd small{display:block;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--faint);text-transform:uppercase}
+.wcol-hd b{font-size:15px}
+.wcol-hd .today-b{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--royal);color:#fff;
+  align-items:center;justify-content:center;font-size:13px}
+.wbody{padding:8px;display:flex;flex-direction:column;gap:7px;flex:1;overflow-y:auto;max-height:60vh}
+.empty-slot{border:1px dashed #E2E8F0;border-radius:9px;padding:14px;text-align:center;font-size:11px;color:var(--faint)}
+
+/* ---------- day agenda ---------- */
+.agenda{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.arow{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px;box-shadow:var(--sh-sm)}
+.arow:hover{box-shadow:var(--sh)}
+.abar{width:5px;border-radius:99px;background:#CBD5E1;flex:0 0 auto}
+.arow h4{margin:0;font-size:13.5px;font-weight:650}
+.arow .meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--soft);align-items:center}
+.quick{margin-left:auto;display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
+select.mini{height:30px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:11.5px;padding:0 6px;color:#334155}
+
+/* ---------- modal / drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(2px);z-index:60;
+  display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .18s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:18px;box-shadow:var(--sh-lg);width:100%;max-width:600px;max-height:92vh;
+  display:flex;flex-direction:column;overflow:hidden;animation:pop .2s cubic-bezier(.32,.72,0,1)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.drawer{position:fixed;top:0;right:0;height:100%;width:100%;max-width:540px;background:#fff;z-index:61;
+  display:flex;flex-direction:column;box-shadow:var(--sh-lg);animation:slide .28s cubic-bezier(.32,.72,0,1)}
+@keyframes slide{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.m-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px}
+.m-hd h3{margin:0;font-size:16px;font-weight:650;letter-spacing:-.2px}
+.m-hd p{margin:2px 0 0;font-size:12px;color:var(--faint)}
+.m-hd .x{margin-left:auto;border:0;background:none;color:var(--faint);font-size:19px;line-height:1;padding:4px 7px;border-radius:7px}
+.m-hd .x:hover{background:#F1F5F9;color:var(--text)}
+.m-bd{padding:18px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:15px}
+.m-ft{padding:12px 20px;border-top:1px solid var(--border);background:#FAFBFF;display:flex;gap:8px;justify-content:flex-end;align-items:center}
+label.fld{display:block}
+label.fld>span{display:block;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--soft);margin-bottom:5px}
+input[type=text],input[type=date],input[type=email],select,textarea{
+  width:100%;border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 11px;background:#fff;
+  font-size:13.5px;color:var(--text);outline:none;box-shadow:var(--sh-sm)}
+input:focus,select:focus,textarea:focus{border-color:var(--royal);box-shadow:0 0 0 3px rgba(44,95,224,.14)}
+textarea{resize:vertical;min-height:82px;line-height:1.6}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.statuses{display:flex;flex-wrap:wrap;gap:6px}
+.st{border:1px solid var(--border);background:#fff;border-radius:99px;padding:5px 11px;font-size:11.5px;font-weight:600;
+  color:var(--soft);display:inline-flex;align-items:center;gap:6px}
+.st.on{box-shadow:0 0 0 2px rgba(44,95,224,.18)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-bottom:8px}
+.thumb{position:relative;aspect-ratio:1;border:1px solid var(--border);border-radius:11px;overflow:hidden;
+  background:#F8FAFF;cursor:zoom-in;box-shadow:var(--sh-sm)}
+.thumb img,.thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px}
+.thumb .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(15,23,42,.78));
+  color:#fff;font-size:9.5px;font-weight:600;padding:12px 5px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb .rm{position:absolute;top:4px;right:4px;width:20px;height:20px;border:0;border-radius:6px;
+  background:rgba(15,23,42,.62);color:#fff;font-size:11px;line-height:1;opacity:0;transition:opacity .15s}
+.thumb:hover .rm{opacity:1}
+.lightbox{position:fixed;inset:0;z-index:80;background:rgba(8,14,30,.86);display:flex;align-items:center;
+  justify-content:center;padding:34px;animation:fade .18s}
+.lightbox img,.lightbox video{max-width:100%;max-height:100%;border-radius:12px;box-shadow:var(--sh-lg)}
+.lightbox .lb-x{position:absolute;top:18px;right:20px;border:0;background:rgba(255,255,255,.14);color:#fff;
+  width:34px;height:34px;border-radius:10px;font-size:16px}
+.lightbox .lb-nm{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:#fff;font-size:12px;opacity:.75}
+.files{display:flex;flex-direction:column;gap:6px}
+.file{display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:9px;padding:8px 10px;box-shadow:var(--sh-sm)}
+.file b{font-size:12px;font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file small{font-size:10px;color:var(--faint)}
+.drophint{border:1px dashed #E2E8F0;border-radius:11px;padding:14px;font-size:11.5px;color:var(--faint);text-align:center}
+.linkrow{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.linkrow a{background:var(--light-blue);color:var(--royal-dark);font-size:11px;font-weight:600;
+  padding:3px 8px;border-radius:7px;text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- popovers ---------- */
+.pop{position:absolute;right:20px;top:64px;z-index:50;background:#fff;border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--sh-lg);width:330px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column}
+.pop-hd{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pop-hd b{font-size:13.5px}
+.pop-bd{overflow-y:auto;padding:12px 15px;display:flex;flex-direction:column;gap:14px}
+.fgroup>span{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--soft);display:block;margin-bottom:7px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.checks label{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#475569;cursor:pointer}
+.swatch{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.ntf{display:flex;gap:9px;padding:11px 15px;border-bottom:1px solid var(--border);cursor:pointer;text-align:left;
+  background:none;border-left:0;border-right:0;border-top:0;width:100%}
+.ntf:hover{background:#F8FAFF}
+.ntf b{font-size:12px;display:block}
+.ntf p{margin:2px 0 0;font-size:11px;color:var(--soft);line-height:1.5}
+
+/* ---------- analytics ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:14px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh-sm)}
+.stat span{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--faint)}
+.stat b{display:block;font-size:24px;font-weight:700;margin-top:5px;letter-spacing:-.5px}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.panel{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh-sm)}
+.panel h4{margin:0 0 3px;font-size:13px;font-weight:650}
+.panel p.sub{margin:0 0 13px;font-size:11.5px;color:var(--faint)}
+.bar{display:flex;align-items:center;gap:9px;margin-bottom:8px;font-size:11.5px}
+.bar .nm{width:104px;flex:0 0 auto;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{flex:1;background:#F1F5F9;height:15px;border-radius:5px;overflow:hidden}
+.bar .fill{height:100%;border-radius:5px;min-width:2px}
+.bar .vl{width:26px;text-align:right;font-weight:700;color:#334155}
+.donut{width:150px;height:150px;border-radius:50%;margin:6px auto;display:flex;align-items:center;justify-content:center;position:relative}
+.donut:after{content:"";position:absolute;inset:22px;background:#fff;border-radius:50%}
+.donut div{position:relative;z-index:1;text-align:center}
+.donut b{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.donut small{display:block;font-size:10.5px;color:var(--faint)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);padding-bottom:7px}
+.tbl td{padding:7px 0;border-top:1px solid var(--border)}
+
+/* ---------- toast ---------- */
+#toasts{position:fixed;bottom:18px;right:18px;z-index:90;display:flex;flex-direction:column;gap:8px}
+.toast{background:#0F172A;color:#fff;font-size:12.5px;padding:10px 15px;border-radius:11px;box-shadow:var(--sh-lg);animation:fade .2s}
+.toast.ok{background:#15803D}
+.toast.err{background:#B91C1C}
+
+.blank{background:#fff;border:1px dashed #E2E8F0;border-radius:var(--r);padding:56px 20px;text-align:center}
+.blank b{display:block;font-size:13.5px;color:var(--soft)}
+.blank small{font-size:11.5px;color:var(--faint)}
+
+@media(max-width:1080px){.panels{grid-template-columns:1fr}.week{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){
+  .week{grid-template-columns:1fr}.two{grid-template-columns:1fr}
+  .cell{min-height:96px}.stack{max-height:150px}
+  .hdr{padding:10px 12px}main{padding:14px 12px 50px}
+  .pop{left:12px;right:12px;width:auto}
+  .search{order:5;max-width:none;flex-basis:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo">
+    <div class="mark">26</div>
+    <div>
+      <h1>2026 Content Calendar</h1>
+      <p id="wsName">Demo Workspace · local only</p>
+    </div>
+  </div>
+
+  <div class="search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" type="text" placeholder="Search title, notes, brand, assignee, type, status…">
+    <button class="clr hidden" id="qClear" title="Clear">✕</button>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="seg" id="views">
+    <button data-v="month" class="on">Monthly</button>
+    <button data-v="week">Weekly</button>
+    <button data-v="day">Daily</button>
+  </div>
+
+  <button class="btn sm" id="btnFilters">Filters <span id="fCount" class="pill hidden">0</span></button>
+  <button class="btn sm" id="btnSave">Save</button>
+  <button class="btn sm" id="btnShare">Share</button>
+  <button class="btn sm" id="btnAnalytics">Analytics</button>
+  <button class="icobtn" id="btnBell" title="Notifications">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+    <span class="dot-badge hidden" id="bellCount">0</span>
+  </button>
+  <div class="avatar" id="btnUser" title="Demo user">YOU</div>
+</header>
+
+<div class="demo-note">
+  Standalone preview — data is saved in this browser only. The full app in the repo uses Firebase Auth, Firestore realtime sync and Storage.
+</div>
+
+<main>
+  <!-- monthly goals -->
+  <section class="goals" id="goalsCard">
+    <div class="goals-hd">
+      <div class="ic">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/></svg>
+      </div>
+      <div><b>Monthly Goals</b><span id="goalMonth">January 2026</span></div>
+      <span class="saved" id="goalSaved">Auto-saved</span>
+    </div>
+    <div class="editor">
+      <div class="etools">
+        <button data-cmd="bold" title="Bold"><b>B</b></button>
+        <button data-cmd="italic" title="Italic"><i>I</i></button>
+        <button data-cmd="underline" title="Underline"><u>U</u></button>
+        <button data-cmd="insertUnorderedList" title="Bulleted list">••</button>
+        <button data-cmd="insertOrderedList" title="Numbered list">1.</button>
+        <button data-cmd="createLink" title="Link">🔗</button>
+      </div>
+      <div class="rt" id="goalBody" contenteditable="true" data-ph="What does the team want to achieve this month?"></div>
+    </div>
+  </section>
+
+  <!-- toolbar -->
+  <div class="toolbar">
+    <button class="btn sm" id="prev">‹</button>
+    <button class="btn sm" id="next">›</button>
+    <button class="btn ghost sm" id="today">Today</button>
+    <h2 id="title">January 2026</h2>
+    <div class="spacer"></div>
+    <span id="counter" class="count"></span>
+    <button class="btn pri sm" id="btnNew">+ New content</button>
+  </div>
+
+  <div id="viewRoot"></div>
+</main>
+
+<div id="layer"></div>
+<div id="toasts"></div>
+
+<script>
+/* =====================================================================
+   2026 Content Calendar — standalone preview
+   Same domain model, colours and interactions as the Next.js app;
+   persistence is localStorage instead of Firestore.
+   ===================================================================== */
+
+const ASSIGNEES = [
+  {key:'sahil',    name:'Sahil',    colour:'Blue',   hex:'#2C5FE0'},
+  {key:'rishi',    name:'Rishi',    colour:'Green',  hex:'#16A34A'},
+  {key:'vedanjay', name:'Vedanjay', colour:'Purple', hex:'#7C3AED'},
+  {key:'ishwar',   name:'Ishwar',   colour:'Orange', hex:'#EA580C'},
+  {key:'anusha',   name:'Anusha',   colour:'Pink',   hex:'#DB2777'},
+  {key:'dia',      name:'Dia',      colour:'Teal',   hex:'#0D9488'},
+  {key:'pranay',   name:'Pranay',   colour:'Red',    hex:'#DC2626'},
+];
+const A = Object.fromEntries(ASSIGNEES.map(a=>[a.key,a]));
+
+const STATUSES = [
+  {key:'not-started', label:'Not Started', hex:'#64748B'},
+  {key:'in-progress', label:'In Progress', hex:'#2563EB'},
+  {key:'review',      label:'Review',      hex:'#D97706'},
+  {key:'approved',    label:'Approved',    hex:'#7C3AED'},
+  {key:'scheduled',   label:'Scheduled',   hex:'#0891B2'},
+  {key:'published',   label:'Published',   hex:'#16A34A'},
+  {key:'completed',   label:'Completed',   hex:'#059669'},
+];
+const S = Object.fromEntries(STATUSES.map(s=>[s.key,s]));
+const DONE = ['published','completed'];
+
+const TYPES = ['Reel','Post','Carousel','Story','Blog','Article','Video','Podcast','Campaign','Newsletter','Email','Landing Page','Other'];
+
+const DEFAULT_BRANDS = [
+  {name:'LTH/AURIKA', colour:'#2C5FE0'}, {name:'WBC',        colour:'#0D9488'},
+  {name:'TMF',        colour:'#7C3AED'}, {name:'NEXTLEAP',   colour:'#EA580C'},
+  {name:'EO GURGAON', colour:'#DB2777'}, {name:'PULSE',      colour:'#DC2626'},
+  {name:'IDAYA',      colour:'#16A34A'}, {name:'PLOT',       colour:'#0B1F3F'},
+];
+const BRAND_COLOURS = ['#2C5FE0','#0D9488','#7C3AED','#EA580C','#DB2777','#DC2626','#16A34A','#0B1F3F','#0891B2','#D97706','#64748B','#059669'];
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const KEY = 'cc2026.standalone.v1';
+
+/* ---------------- state ---------------- */
+const blankFilters = () => ({brands:[],assignees:[],statuses:[],types:[],from:'',to:''});
+
+let state = {
+  items: [],
+  brands: DEFAULT_BRANDS.map((b,i)=>({id:'b'+i, name:b.name, colour:b.colour, isDefault:true})),
+  goals: {},
+  view: 'month',
+  current: '2026-01-01',
+  search: '',
+  filters: blankFilters(),
+};
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      state = {...state, ...saved, filters:{...blankFilters(), ...(saved.filters||{})}};
+    }
+  }catch(e){ /* corrupt storage — start clean */ }
+}
+function save(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify({
+      items:state.items, brands:state.brands, goals:state.goals,
+      view:state.view, current:state.current, filters:state.filters
+    }));
+    return true;
+  }catch(e){ toast('Could not save locally — storage is full.','err'); return false; }
+}
+
+/* ---------------- dates ---------------- */
+const pad = n => String(n).padStart(2,'0');
+const key = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const addDays = (d,n) => { const c = new Date(d); c.setDate(c.getDate()+n); return c; };
+const addMonths = (d,n) => { const c = new Date(d.getFullYear(), d.getMonth()+n, 1); return c; };
+const todayKey = () => key(new Date());
+const monthKey = k => k.slice(0,7);
+
+function monthGrid(d){
+  const first = new Date(d.getFullYear(), d.getMonth(), 1);
+  const start = addDays(first, -first.getDay());
+  return Array.from({length:42}, (_,i)=>addDays(start,i));
+}
+function weekDays(d){ const s = addDays(d,-d.getDay()); return Array.from({length:7},(_,i)=>addDays(s,i)); }
+function fmtShort(k){ if(!k) return ''; const d = parse(k); return `${MONTHS[d.getMonth()].slice(0,3)} ${d.getDate()}`; }
+function fmtLong(k){ if(!k) return ''; const d = parse(k); return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`; }
+function fmtDayTitle(k){ const d = parse(k); return `${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]}, ${fmtLong(k)}`; }
+function daysUntil(k){
+  if(!k) return null;
+  const a = parse(k), b = new Date();
+  a.setHours(0,0,0,0); b.setHours(0,0,0,0);
+  return Math.round((a-b)/86400000);
+}
+const isLate = it => it.deadline && !DONE.includes(it.status) && daysUntil(it.deadline) < 0;
+
+/* ---------------- helpers ---------------- */
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const esc = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const strip = h => String(h??'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+const clean = h => String(h??'')
+  .replace(/<\s*(script|style|iframe|object|embed)[^>]*>[\s\S]*?<\/\s*\1\s*>/gi,'')
+  .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,'')
+  .replace(/javascript:/gi,'#');
+function bytes(n){
+  if(!n) return '0 B';
+  const units = ['B','KB','MB','GB'];
+  const i = Math.min(Math.floor(Math.log(n)/Math.log(1024)), units.length-1);
+  return (n/Math.pow(1024,i)).toFixed(i ? 1 : 0) + ' ' + units[i];
+}
+const urls = t => (String(t||'').match(/https?:\/\/[^\s<>"')]+/gi) || []).slice(0,8);
+const brandOf = id => state.brands.find(b=>b.id===id) || null;
+
+/* ---------------- attachments ----------------
+   Images small enough to store are kept as data URLs so their preview
+   survives a reload. Everything else gets an object URL that lives for this
+   page session only (the real app streams these from Firebase Storage). */
+const THUMB_LIMIT = 400 * 1024;
+const blobs = new Map();                       // attachment id -> object URL
+const previewURL = f => f.url || blobs.get(f.id) || null;
+const isImage = f => (f.type||'').startsWith('image/');
+const isVideo = f => (f.type||'').startsWith('video/');
+
+function iconFor(type, name){
+  const ext = (name.split('.').pop()||'').toLowerCase();
+  if((type||'').startsWith('image/')) return '🖼️';
+  if((type||'').startsWith('video/')) return '🎬';
+  if(ext==='pdf') return '📄';
+  if(['xls','xlsx','csv'].includes(ext)) return '📊';
+  if(['doc','docx'].includes(ext)) return '📝';
+  return '📁';
+}
+const readDataURL = file => new Promise((res,rej)=>{
+  const r = new FileReader();
+  r.onload = () => res(r.result);
+  r.onerror = () => rej(r.error);
+  r.readAsDataURL(file);
+});
+
+function openLightbox(f){
+  const src = previewURL(f);
+  if(!src) return;
+  const box = document.createElement('div');
+  box.className = 'lightbox';
+  box.innerHTML = `${isVideo(f) ? `<video src="${src}" controls autoplay></video>`
+    : `<img src="${src}" alt="${esc(f.name)}">`}
+    <button class="lb-x" title="Close">✕</button>
+    <div class="lb-nm">${esc(f.name)} · ${bytes(f.size)}</div>`;
+  box.addEventListener('click', e=>{ if(e.target===box || e.target.closest('.lb-x')) box.remove(); });
+  document.body.appendChild(box);
+}
+
+function toast(msg, kind){
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' '+kind : '');
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 2600);
+}
+
+/* ---------------- filtering ---------------- */
+function matches(it){
+  const q = state.search.trim().toLowerCase();
+  if(q){
+    const hay = [it.title, strip(it.notes), it.references, it.brandName||'',
+      it.assignee ? A[it.assignee]?.name : '', it.type||'', S[it.status]?.label||''].join(' ').toLowerCase();
+    if(!q.split(/\s+/).every(t=>hay.includes(t))) return false;
+  }
+  const f = state.filters;
+  if(f.brands.length    && !f.brands.includes(it.brandId))       return false;
+  if(f.assignees.length && !f.assignees.includes(it.assignee))   return false;
+  if(f.statuses.length  && !f.statuses.includes(it.status))      return false;
+  if(f.types.length     && !f.types.includes(it.type))           return false;
+  if(f.from || f.to){
+    if(!it.deadline) return false;
+    if(f.from && it.deadline < f.from) return false;
+    if(f.to   && it.deadline > f.to)   return false;
+  }
+  return true;
+}
+const visible   = () => state.items.filter(matches);
+const byBoard   = list => [...list].sort((a,b)=> a.order - b.order || a.createdAt - b.createdAt);
+const byDeadline= list => [...list].sort((a,b)=>{
+  if(a.deadline && b.deadline) { if(a.deadline!==b.deadline) return a.deadline < b.deadline ? -1 : 1; }
+  else if(a.deadline) return -1;
+  else if(b.deadline) return 1;
+  return a.createdAt - b.createdAt;
+});
+const onDate = (k, all) => byBoard((all ? state.items : visible()).filter(i=>i.date===k));
+const filterCount = () => {
+  const f = state.filters;
+  return f.brands.length + f.assignees.length + f.statuses.length + f.types.length + (f.from?1:0) + (f.to?1:0);
+};
+
+/* ---------------- tile ---------------- */
+function tileHTML(it, full){
+  const a = it.assignee ? A[it.assignee] : null;
+  const st = S[it.status];
+  const late = isLate(it);
+  return `<div class="tile${full?' full':''}" draggable="true" data-id="${it.id}"
+      style="border-left-color:${a?a.hex:'#CBD5E1'};background:${a?a.hex+'0F':'#fff'}">
+    <div class="tile-top">
+      <span class="grip" data-grip title="Drag to another date">
+        <svg width="11" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden="true">
+          <circle cx="3" cy="3" r="1.4"/><circle cx="7" cy="3" r="1.4"/>
+          <circle cx="3" cy="7" r="1.4"/><circle cx="7" cy="7" r="1.4"/>
+          <circle cx="3" cy="11" r="1.4"/><circle cx="7" cy="11" r="1.4"/></svg>
+      </span>
+      <div class="tile-title">${esc(it.title)}</div>
+      <span class="sdot" style="background:${st.hex}" title="${st.label}"></span>
+    </div>
+    <div class="tile-meta">
+      ${it.brandName ? `<span class="chip">${esc(it.brandName)}</span>` : ''}
+      ${it.type ? `<span class="chip out">${esc(it.type)}</span>` : ''}
+      ${it.deadline ? `<span class="due${late?' late':''}">${late?'⚠':'🕑'} ${fmtShort(it.deadline)}</span>` : ''}
+      ${it.files?.length ? `<span class="due">📎 ${it.files.length}</span>` : ''}
+    </div>
+    ${full && a ? `<div class="who">
+        <i style="background:${a.hex}">${a.name[0]}</i><span>${a.name}</span>
+        <span class="badge" style="color:${st.hex};border-color:${st.hex}44;background:${st.hex}12">${st.label}</span>
+      </div>` : ''}
+  </div>`;
+}
+
+/* ---------------- views ---------------- */
+function render(){
+  document.getElementById('q').value = state.search;
+  document.getElementById('qClear').classList.toggle('hidden', !state.search);
+  document.querySelectorAll('#views button').forEach(b=>b.classList.toggle('on', b.dataset.v===state.view));
+
+  const fc = filterCount();
+  const fcEl = document.getElementById('fCount');
+  fcEl.textContent = fc; fcEl.classList.toggle('hidden', fc===0);
+
+  const cur = parse(state.current);
+  document.getElementById('title').textContent =
+    state.view==='month' ? `${MONTHS[cur.getMonth()]} ${cur.getFullYear()}`
+    : state.view==='week' ? (()=>{ const w=weekDays(cur); return `${MONTHS[w[0].getMonth()].slice(0,3)} ${w[0].getDate()} – ${MONTHS[w[6].getMonth()].slice(0,3)} ${w[6].getDate()}, ${w[6].getFullYear()}`; })()
+    : fmtDayTitle(state.current);
+
+  const vis = visible();
+  const cnt = document.getElementById('counter');
+  if(state.search.trim() || fc){ cnt.className='count act'; cnt.textContent = `${vis.length} of ${state.items.length} shown`; }
+  else { cnt.className='count'; cnt.textContent = `${state.items.length} item${state.items.length===1?'':'s'} planned`; }
+
+  renderGoals();
+  const root = document.getElementById('viewRoot');
+  root.innerHTML = state.view==='month' ? monthHTML() : state.view==='week' ? weekHTML() : dayHTML();
+  wireDnd();
+  renderBell();
+}
+
+function monthHTML(){
+  const cur = parse(state.current);
+  const cells = monthGrid(cur).map(d=>{
+    const k = key(d);
+    const out = d.getMonth() !== cur.getMonth();
+    const items = onDate(k);
+    return `<div class="cell${out?' out':''}" data-date="${k}">
+      <div class="cell-hd">
+        <span class="daynum${k===todayKey()?' today':''}">${d.getDate()}</span>
+        <span class="cell-tools">
+          ${items.length ? `<span class="pill">${items.length}</span>` : ''}
+          <button class="add" data-add="${k}" title="Add content">+</button>
+        </span>
+      </div>
+      <div class="stack">${items.map(i=>tileHTML(i,false)).join('')}</div>
+    </div>`;
+  }).join('');
+  return `<section class="cal">
+    <div class="wk-hd">${DAYS.map(d=>`<div>${d}</div>`).join('')}</div>
+    <div class="grid">${cells}</div>
+  </section>`;
+}
+
+function weekHTML(){
+  return `<section class="week">${weekDays(parse(state.current)).map(d=>{
+    const k = key(d), items = onDate(k);
+    return `<div class="wcol" data-date="${k}">
+      <div class="wcol-hd" data-day="${k}">
+        <div><small>${DAYS[d.getDay()]}</small>
+          <b class="${k===todayKey()?'today-b':''}">${d.getDate()}</b></div>
+        <span class="cell-tools">
+          ${items.length?`<span class="pill">${items.length}</span>`:''}
+          <button class="add" data-add="${k}" title="Add content">+</button></span>
+      </div>
+      <div class="wbody">
+        ${items.map(i=>tileHTML(i,true)).join('') || '<div class="empty-slot">No content</div>'}
+      </div>
+    </div>`;
+  }).join('')}</section>`;
+}
+
+function dayHTML(){
+  const items = byDeadline(visible().filter(i=>i.date===state.current));
+  if(!items.length){
+    return `<div class="blank"><b>No content for this day</b>
+      <small>Use “New content” to plan something.</small></div>`;
+  }
+  return `<section class="agenda">${items.map(it=>{
+    const a = it.assignee ? A[it.assignee] : null, st = S[it.status], late = isLate(it);
+    return `<div class="arow" data-open="${it.id}">
+      <div class="abar" style="background:${a?a.hex:'#CBD5E1'}"></div>
+      <div style="flex:1;min-width:0">
+        <h4>${esc(it.title)}</h4>
+        <div class="meta">
+          ${it.brandName?`<span class="chip">${esc(it.brandName)}</span>`:''}
+          ${it.type?`<span class="chip out">${esc(it.type)}</span>`:''}
+          <span class="${late?'due late':'due'}">${it.deadline?`Deadline ${fmtLong(it.deadline)}`:'No deadline'}</span>
+          ${it.files?.length?`<span>📎 ${it.files.length}</span>`:''}
+          <span class="badge" style="color:${st.hex};border-color:${st.hex}44;background:${st.hex}12">${st.label}</span>
+        </div>
+      </div>
+      <div class="quick" data-stop="1">
+        <select class="mini" data-quick-status="${it.id}">
+          ${STATUSES.map(s=>`<option value="${s.key}"${s.key===it.status?' selected':''}>${s.label}</option>`).join('')}
+        </select>
+        <select class="mini" data-quick-assignee="${it.id}">
+          <option value="">Unassigned</option>
+          ${ASSIGNEES.map(x=>`<option value="${x.key}"${x.key===it.assignee?' selected':''}>${x.name}</option>`).join('')}
+        </select>
+      </div>
+    </div>`;
+  }).join('')}</section>`;
+}
+
+/* ---------------- monthly goals ---------------- */
+let goalTimer = null;
+function renderGoals(){
+  const mk = monthKey(state.current);
+  const d = parse(state.current);
+  document.getElementById('goalMonth').textContent = `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  const body = document.getElementById('goalBody');
+  if(body.dataset.month !== mk){
+    body.dataset.month = mk;
+    body.innerHTML = clean(state.goals[mk] || '');
+  }
+}
+document.getElementById('goalBody').addEventListener('input', ()=>{
+  const body = document.getElementById('goalBody');
+  clearTimeout(goalTimer);
+  goalTimer = setTimeout(()=>{
+    state.goals[body.dataset.month] = clean(body.innerHTML);
+    save();
+    const s = document.getElementById('goalSaved');
+    s.classList.add('show'); setTimeout(()=>s.classList.remove('show'), 1800);
+  }, 700);
+});
+document.querySelectorAll('.etools button').forEach(b=>{
+  b.addEventListener('mousedown', e=>e.preventDefault());
+  b.addEventListener('click', ()=>{
+    const cmd = b.dataset.cmd;
+    if(cmd==='createLink'){
+      const u = prompt('Link URL','https://');
+      if(!u || !/^https?:\/\//i.test(u)) return;
+      document.execCommand('createLink', false, u);
+    } else document.execCommand(cmd, false, null);
+    document.getElementById('goalBody').dispatchEvent(new Event('input'));
+  });
+});
+
+/* ---------------- drag & drop ---------------- */
+let dragId = null;
+function wireDnd(){
+  document.querySelectorAll('.tile').forEach(t=>{
+    t.addEventListener('dragstart', e=>{
+      dragId = t.dataset.id;
+      t.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', dragId);
+    });
+    t.addEventListener('dragend', ()=>{ dragId=null; t.classList.remove('dragging'); });
+    t.addEventListener('dragover', e=>{ if(dragId && dragId!==t.dataset.id) e.preventDefault(); });
+    t.addEventListener('drop', e=>{
+      if(!dragId || dragId===t.dataset.id) return;
+      e.preventDefault(); e.stopPropagation();
+      dropOn(t.closest('[data-date]').dataset.date, t.dataset.id);
+    });
+  });
+  document.querySelectorAll('[data-date]').forEach(c=>{
+    c.addEventListener('dragover', e=>{ if(dragId){ e.preventDefault(); c.classList.add('drop'); } });
+    c.addEventListener('dragleave', ()=>c.classList.remove('drop'));
+    c.addEventListener('drop', e=>{
+      c.classList.remove('drop');
+      if(!dragId) return;
+      e.preventDefault();
+      dropOn(c.dataset.date, null);
+    });
+  });
+}
+/** Moves the dragged item to `date`, before `beforeId` when dropped on a tile. */
+function dropOn(date, beforeId){
+  const it = state.items.find(i=>i.id===dragId);
+  if(!it) return;
+  const rest = byBoard(state.items.filter(i=>i.date===date && i.id!==it.id));
+  const at = beforeId ? Math.max(0, rest.findIndex(i=>i.id===beforeId)) : rest.length;
+  rest.splice(at, 0, it);
+  const from = it.date;
+  it.date = date;
+  rest.forEach((x,i)=>{ x.order = (i+1)*1000; });
+  if(from !== date) byBoard(state.items.filter(i=>i.date===from)).forEach((x,i)=>{ x.order=(i+1)*1000; });
+  save(); render();
+}
+
+/* ---------------- layer (modals & drawers) ---------------- */
+const layer = document.getElementById('layer');
+const closeLayer = () => { layer.innerHTML = ''; };
+layer.addEventListener('mousedown', e=>{ if(e.target.classList.contains('scrim')) closeLayer(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLayer(); });
+
+function brandOptions(sel){
+  return `<option value="">Select brand</option>` +
+    state.brands.map(b=>`<option value="${b.id}"${b.id===sel?' selected':''}>${esc(b.name)}</option>`).join('') +
+    `<option value="__add">＋ Add Brand</option>`;
+}
+const assigneeOptions = sel => `<option value="">Select assignee</option>` +
+  ASSIGNEES.map(a=>`<option value="${a.key}"${a.key===sel?' selected':''}>${a.name} (${a.colour})</option>`).join('');
+const typeOptions = sel => `<option value="">Select type</option>` +
+  TYPES.map(t=>`<option${t===sel?' selected':''}>${t}</option>`).join('');
+
+/* ----- create ----- */
+function openCreate(date){
+  layer.innerHTML = `<div class="scrim"><div class="modal">
+    <div class="m-hd"><div><h3>Create content</h3><p>Scheduled for ${fmtLong(date)}</p></div>
+      <button class="x" data-close>✕</button></div>
+    <div class="m-bd">
+      <label class="fld"><span>Title</span><input type="text" id="cTitle" placeholder="e.g. Launch teaser reel" autofocus></label>
+      <div class="two">
+        <label class="fld"><span>Brand</span><select id="cBrand">${brandOptions('')}</select></label>
+        <label class="fld"><span>Kisko Karna Padega</span><select id="cWho">${assigneeOptions('')}</select></label>
+        <label class="fld"><span>Content type</span><select id="cType">${typeOptions('')}</select></label>
+        <label class="fld"><span>Deadline</span><input type="date" id="cDue"></label>
+      </div>
+      <label class="fld"><span>Notes</span><textarea id="cNotes" placeholder="Brief, hook, references…"></textarea></label>
+    </div>
+    <div class="m-ft"><button class="btn" data-close>Cancel</button>
+      <button class="btn pri" id="cSave">Create content</button></div>
+  </div></div>`;
+
+  const brandSel = document.getElementById('cBrand');
+  brandSel.addEventListener('change', ()=>{ if(brandSel.value==='__add'){ brandSel.value=''; openAddBrand(id=>{ openCreate(date); document.getElementById('cBrand').value=id; }); }});
+
+  document.getElementById('cSave').onclick = ()=>{
+    const title = document.getElementById('cTitle').value.trim();
+    if(!title) return toast('Give the content a title first.','err');
+    const b = brandOf(document.getElementById('cBrand').value);
+    const now = Date.now();
+    state.items.push({
+      id:uid(), title, date,
+      brandId:b?b.id:null, brandName:b?b.name:null,
+      assignee:document.getElementById('cWho').value || null,
+      type:document.getElementById('cType').value || null,
+      deadline:document.getElementById('cDue').value || null,
+      status:'not-started', references:'',
+      notes:esc(document.getElementById('cNotes').value).replace(/\n/g,'<br>'),
+      files:[], order:now, createdAt:now, updatedAt:now
+    });
+    save(); closeLayer(); render(); toast('Content added','ok');
+  };
+}
+
+/* ----- details drawer ----- */
+function openDetails(id){
+  const it = state.items.find(x=>x.id===id);
+  if(!it) return;
+  layer.innerHTML = `<div class="scrim"></div><aside class="drawer">
+    <div class="m-hd"><div><h3>Content Details</h3><p>Scheduled ${fmtLong(it.date)}</p></div>
+      <button class="x" data-close>✕</button></div>
+    <div class="m-bd">
+      <label class="fld"><span>Content Title</span><input type="text" id="dTitle" value="${esc(it.title)}"></label>
+      <div class="two">
+        <label class="fld"><span>Brand</span><select id="dBrand">${brandOptions(it.brandId)}</select></label>
+        <label class="fld"><span>Kisko Karna Padega</span><select id="dWho">${assigneeOptions(it.assignee)}</select></label>
+        <label class="fld"><span>Content Type</span><select id="dType">${typeOptions(it.type)}</select></label>
+        <label class="fld"><span>Deadline</span><input type="date" id="dDue" value="${it.deadline||''}"></label>
+      </div>
+      <div><span style="font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--soft);display:block;margin-bottom:6px">Status</span>
+        <div class="statuses" id="dStatus">${STATUSES.map(s=>`<button class="st${s.key===it.status?' on':''}" data-st="${s.key}"
+          style="${s.key===it.status?`color:${s.hex};border-color:${s.hex}55;background:${s.hex}12`:''}">
+          <span class="swatch" style="background:${s.hex}"></span>${s.label}</button>`).join('')}</div></div>
+      <label class="fld"><span>References / Links</span>
+        <textarea id="dRefs" placeholder="Drive links, Notion pages, YouTube references, docs…">${esc(it.references||'')}</textarea>
+        <div class="linkrow" id="dLinks"></div></label>
+      <label class="fld"><span>Notes</span>
+        <div class="editor" style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div class="etools" id="dTools">
+            <button data-cmd="bold"><b>B</b></button><button data-cmd="italic"><i>I</i></button>
+            <button data-cmd="underline"><u>U</u></button><button data-cmd="insertUnorderedList">••</button>
+            <button data-cmd="insertOrderedList">1.</button>
+          </div>
+          <div class="rt" id="dNotes" contenteditable="true" data-ph="Full brief, script, captions, hashtags…">${clean(it.notes||'')}</div>
+        </div></label>
+      <div><span style="font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--soft);display:block;margin-bottom:6px">Attachments</span>
+        <div class="thumbs hidden" id="dThumbs"></div>
+        <div class="files" id="dFiles"></div>
+        <input type="file" id="dFile" multiple class="hidden"
+          accept="image/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx">
+        <button class="btn sm" id="dUpload" style="margin-top:8px">＋ Add file</button>
+        <div class="drophint" style="margin-top:8px" id="dHint">Images, video, PDF, DOCX, XLSX. Previews render here; in the full app the files upload to Firebase Storage.</div>
+      </div>
+    </div>
+    <div class="m-ft">
+      <button class="btn danger" id="dDelete" style="margin-right:auto">Delete</button>
+      <button class="btn" data-close>Close</button>
+      <button class="btn pri" id="dSave">Save</button>
+    </div></aside>`;
+
+  let status = it.status;
+  const refs = document.getElementById('dRefs');
+  const paintLinks = ()=>{ document.getElementById('dLinks').innerHTML =
+    urls(refs.value).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(u.replace(/^https?:\/\//,'').slice(0,44))}</a>`).join(''); };
+  paintLinks(); refs.addEventListener('input', paintLinks);
+
+  document.getElementById('dStatus').addEventListener('click', e=>{
+    const b = e.target.closest('[data-st]'); if(!b) return;
+    status = b.dataset.st;
+    document.querySelectorAll('#dStatus .st').forEach(x=>{
+      const s = S[x.dataset.st], on = x.dataset.st===status;
+      x.classList.toggle('on', on);
+      x.style.cssText = on ? `color:${s.hex};border-color:${s.hex}55;background:${s.hex}12` : '';
+    });
+  });
+
+  document.querySelectorAll('#dTools button').forEach(b=>{
+    b.addEventListener('mousedown', e=>e.preventDefault());
+    b.addEventListener('click', ()=>document.execCommand(b.dataset.cmd,false,null));
+  });
+
+  const brandSel = document.getElementById('dBrand');
+  brandSel.addEventListener('change', ()=>{ if(brandSel.value==='__add'){ brandSel.value = it.brandId||''; openAddBrand(id=>{ openDetails(it.id); document.getElementById('dBrand').value=id; }); }});
+
+  const paintFiles = ()=>{
+    const files = it.files || [];
+    const previewable = files.filter(f => previewURL(f) && (isImage(f) || isVideo(f)));
+    const rest = files.filter(f => !previewable.includes(f));
+
+    const thumbs = document.getElementById('dThumbs');
+    thumbs.classList.toggle('hidden', previewable.length === 0);
+    thumbs.innerHTML = previewable.map(f=>{
+      const i = files.indexOf(f), src = previewURL(f);
+      return `<div class="thumb" data-preview="${i}">
+        ${isVideo(f) ? `<video src="${src}" muted preload="metadata"></video>`
+                     : `<img src="${src}" alt="${esc(f.name)}" loading="lazy">`}
+        <button class="rm" data-rmfile="${i}" title="Remove">✕</button>
+        <span class="cap">${esc(f.name)}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('dFiles').innerHTML = rest.map(f=>{
+      const i = files.indexOf(f), src = previewURL(f);
+      return `<div class="file"><span>${f.kind || iconFor(f.type, f.name)}</span>
+        <div style="flex:1;min-width:0"><b>${esc(f.name)}</b>
+          <small>${bytes(f.size)}${!src && (isImage(f)||isVideo(f)) ? ' · preview not stored' : ''}</small></div>
+        ${src ? `<a class="btn sm" href="${src}" target="_blank" rel="noopener noreferrer"
+                   ${f.url ? `download="${esc(f.name)}"` : ''}>Open</a>` : ''}
+        <button class="btn danger sm" data-rmfile="${i}">Remove</button></div>`;
+    }).join('');
+
+    document.getElementById('dHint').classList.toggle('hidden', files.length > 0);
+  };
+  paintFiles();
+
+  document.getElementById('dUpload').onclick = ()=>document.getElementById('dFile').click();
+  document.getElementById('dFile').addEventListener('change', async e=>{
+    const picked = [...e.target.files];
+    e.target.value = '';
+    for(const f of picked){
+      const rec = {id:uid(), name:f.name, size:f.size, type:f.type||'', kind:iconFor(f.type, f.name)};
+      // Small images persist as data URLs; everything else previews for this session.
+      if(isImage(f) && f.size <= THUMB_LIMIT){
+        try{ rec.url = await readDataURL(f); }catch(err){ /* fall through to blob */ }
+      }
+      if(!rec.url) blobs.set(rec.id, URL.createObjectURL(f));
+      (it.files ||= []).push(rec);
+
+      if(!save() && rec.url){
+        // Storage is full — keep the attachment, drop the persisted preview.
+        delete rec.url;
+        blobs.set(rec.id, URL.createObjectURL(f));
+        save();
+        toast(`Preview for ${f.name} is session-only — local storage is full.`);
+      }
+    }
+    paintFiles(); render();
+  });
+
+  document.querySelector('.drawer').addEventListener('click', e=>{
+    const rm = e.target.closest('[data-rmfile]');
+    if(rm){
+      e.stopPropagation();
+      const i = Number(rm.dataset.rmfile), f = it.files[i];
+      if(f && blobs.has(f.id)){ URL.revokeObjectURL(blobs.get(f.id)); blobs.delete(f.id); }
+      it.files.splice(i,1); save(); paintFiles(); render();
+      return;
+    }
+    const th = e.target.closest('[data-preview]');
+    if(th) openLightbox(it.files[Number(th.dataset.preview)]);
+  });
+
+  document.getElementById('dDelete').onclick = ()=>{
+    if(!confirm(`Delete "${it.title}"? This cannot be undone.`)) return;
+    state.items = state.items.filter(x=>x.id!==it.id);
+    save(); closeLayer(); render(); toast('Content deleted','ok');
+  };
+  document.getElementById('dSave').onclick = ()=>{
+    const title = document.getElementById('dTitle').value.trim();
+    if(!title) return toast('A title is required.','err');
+    const b = brandOf(document.getElementById('dBrand').value);
+    Object.assign(it, {
+      title, brandId:b?b.id:null, brandName:b?b.name:null,
+      assignee:document.getElementById('dWho').value || null,
+      type:document.getElementById('dType').value || null,
+      deadline:document.getElementById('dDue').value || null,
+      status, references:refs.value,
+      notes:clean(document.getElementById('dNotes').innerHTML),
+      updatedAt:Date.now()
+    });
+    save(); closeLayer(); render(); toast('Saved','ok');
+  };
+}
+
+/* ----- day expanded ----- */
+function openDay(date){
+  const items = byDeadline(state.items.filter(i=>i.date===date));
+  layer.innerHTML = `<div class="scrim"><div class="modal">
+    <div class="m-hd"><div><h3>${fmtDayTitle(date)}</h3>
+      <p>${items.length ? `${items.length} item${items.length===1?'':'s'} · sorted by deadline, then creation time` : 'This day is empty.'}</p></div>
+      <button class="x" data-close>✕</button></div>
+    <div class="m-bd">
+      ${items.length ? items.map(it=>{
+        const a = it.assignee?A[it.assignee]:null, st = S[it.status];
+        return `<button class="arow" data-open="${it.id}" style="width:100%;text-align:left;border:1px solid var(--border);background:#fff">
+          <div class="abar" style="background:${a?a.hex:'#CBD5E1'}"></div>
+          <div style="flex:1;min-width:0"><h4>${esc(it.title)}</h4>
+            <div class="meta">${it.brandName?`<span class="chip">${esc(it.brandName)}</span>`:''}
+              ${it.type?`<span class="chip out">${esc(it.type)}</span>`:''}
+              <span>${a?a.name:'Unassigned'}</span>
+              ${it.deadline?`<span class="${isLate(it)?'due late':'due'}">${fmtLong(it.deadline)}</span>`:''}</div></div>
+          <span class="badge" style="color:${st.hex};border-color:${st.hex}44;background:${st.hex}12">${st.label}</span>
+        </button>`; }).join('')
+      : `<div class="blank"><b>Nothing scheduled for this date yet</b></div>`}
+    </div>
+    <div class="m-ft"><button class="btn" data-close>Close</button>
+      <button class="btn pri" data-create="${date}">+ Add content</button></div>
+  </div></div>`;
+}
+
+/* ----- add brand ----- */
+function openAddBrand(after){
+  let colour = BRAND_COLOURS[Math.floor(Math.random()*BRAND_COLOURS.length)];
+  layer.innerHTML = `<div class="scrim"><div class="modal" style="max-width:420px">
+    <div class="m-hd"><div><h3>Add brand</h3><p>Available in every dropdown straight away.</p></div>
+      <button class="x" data-close>✕</button></div>
+    <div class="m-bd">
+      <label class="fld"><span>Brand name</span><input type="text" id="bName" placeholder="e.g. NORTHSTAR" autofocus></label>
+      <div><span style="font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--soft);display:block;margin-bottom:8px">Colour</span>
+        <div id="bColours" style="display:flex;flex-wrap:wrap;gap:8px">
+          ${BRAND_COLOURS.map(c=>`<button data-c="${c}" style="width:26px;height:26px;border-radius:50%;border:0;background:${c};
+            outline:${c===colour?'2px solid #0F172A':'none'};outline-offset:2px"></button>`).join('')}
+        </div></div>
+    </div>
+    <div class="m-ft"><button class="btn" data-close>Cancel</button><button class="btn pri" id="bSave">Add brand</button></div>
+  </div></div>`;
+
+  document.getElementById('bColours').addEventListener('click', e=>{
+    const b = e.target.closest('[data-c]'); if(!b) return;
+    colour = b.dataset.c;
+    document.querySelectorAll('#bColours button').forEach(x=>x.style.outline = x.dataset.c===colour?'2px solid #0F172A':'none');
+  });
+  document.getElementById('bSave').onclick = ()=>{
+    const name = document.getElementById('bName').value.trim();
+    if(!name) return toast('Enter a brand name.','err');
+    if(state.brands.some(b=>b.name.toLowerCase()===name.toLowerCase())) return toast('That brand already exists.','err');
+    const b = {id:uid(), name, colour, isDefault:false};
+    state.brands.push(b); save(); closeLayer(); render(); toast(`${name} added`,'ok');
+    if(after) after(b.id);
+  };
+}
+
+/* ----- filters ----- */
+function openFilters(){
+  const f = state.filters;
+  const box = (group, val, label, colour) =>
+    `<label><input type="checkbox" data-g="${group}" value="${esc(val)}"${
+      f[group].includes(val)?' checked':''}>${colour?`<span class="swatch" style="background:${colour}"></span>`:''}${esc(label)}</label>`;
+  layer.innerHTML = `<div class="scrim" style="background:transparent;backdrop-filter:none">
+    <div class="pop" onclick="event.stopPropagation()">
+      <div class="pop-hd"><b>Advanced filters</b><button class="btn ghost sm" id="fClear">Clear</button></div>
+      <div class="pop-bd">
+        <div class="fgroup"><span>Brand</span><div class="checks">${state.brands.map(b=>box('brands',b.id,b.name,b.colour)).join('')}</div></div>
+        <div class="fgroup"><span>Assignee</span><div class="checks">${ASSIGNEES.map(a=>box('assignees',a.key,a.name,a.hex)).join('')}</div></div>
+        <div class="fgroup"><span>Status</span><div class="checks">${STATUSES.map(s=>box('statuses',s.key,s.label,s.hex)).join('')}</div></div>
+        <div class="fgroup"><span>Content type</span><div class="checks">${TYPES.map(t=>box('types',t,t)).join('')}</div></div>
+        <div class="fgroup"><span>Deadline range</span>
+          <div style="display:flex;gap:8px"><input type="date" id="fFrom" value="${f.from}"><input type="date" id="fTo" value="${f.to}"></div></div>
+      </div></div></div>`;
+
+  layer.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change', ()=>{
+    const g = c.dataset.g, v = c.value;
+    state.filters[g] = c.checked ? [...state.filters[g], v] : state.filters[g].filter(x=>x!==v);
+    save(); render();
+  }));
+  document.getElementById('fFrom').addEventListener('change', e=>{ state.filters.from = e.target.value; save(); render(); });
+  document.getElementById('fTo').addEventListener('change',   e=>{ state.filters.to   = e.target.value; save(); render(); });
+  document.getElementById('fClear').onclick = ()=>{ state.filters = blankFilters(); save(); render(); closeLayer(); };
+}
+
+/* ----- notifications ----- */
+function notifications(){
+  const out = [];
+  state.items.forEach(it=>{
+    if(DONE.includes(it.status)) return;
+    const d = daysUntil(it.deadline);
+    if(d===null) return;
+    if(d < 0)       out.push({t:'Overdue content', m:`"${it.title}" was due ${fmtLong(it.deadline)}.`, id:it.id, i:'⚠️', s:d});
+    else if(d <= 3) out.push({t:d===0?'Due today':`Due in ${d} day${d===1?'':'s'}`, m:`"${it.title}" is due ${fmtLong(it.deadline)}.`, id:it.id, i:'🕑', s:d});
+  });
+  return out.sort((a,b)=>a.s-b.s);
+}
+function renderBell(){
+  const n = notifications().length;
+  const b = document.getElementById('bellCount');
+  b.textContent = n > 99 ? '99+' : n;
+  b.classList.toggle('hidden', n===0);
+}
+function openBell(){
+  const list = notifications();
+  layer.innerHTML = `<div class="scrim" style="background:transparent;backdrop-filter:none">
+    <div class="pop" onclick="event.stopPropagation()">
+      <div class="pop-hd"><div><b>Notifications</b><div style="font-size:11px;color:var(--faint)">
+        ${list.length? `${list.length} needing attention` : 'You are all caught up'}</div></div></div>
+      <div style="overflow-y:auto">${list.length ? list.map(n=>
+        `<button class="ntf" data-open="${n.id}"><span>${n.i}</span><span style="flex:1">
+          <b>${esc(n.t)}</b><p>${esc(n.m)}</p></span></button>`).join('')
+        : `<div style="padding:34px;text-align:center;color:var(--faint);font-size:12px">No notifications yet</div>`}
+      </div></div></div>`;
+}
+
+/* ----- share ----- */
+function openShare(){
+  layer.innerHTML = `<div class="scrim"><div class="modal" style="max-width:480px">
+    <div class="m-hd"><div><h3>Share workspace</h3><p>Collaboration lives in the full app.</p></div>
+      <button class="x" data-close>✕</button></div>
+    <div class="m-bd">
+      <p style="margin:0;font-size:13px;line-height:1.65;color:var(--soft)">
+        This standalone file keeps everything in your own browser, so there is nobody to share with.
+        The Next.js app in the repository adds Firebase Auth, workspace share links
+        (<code>/workspace/[id]</code> and <code>/join/[token]</code>), email invitations and
+        Admin / Editor / Viewer roles enforced by Firestore security rules — every member sees the
+        same live calendar without refreshing.</p>
+      <div class="drophint" style="text-align:left">
+        <b style="color:var(--text)">To run the real thing</b><br>
+        npm install → add Firebase credentials to <code>.env.local</code> → npm run dev
+      </div>
+    </div>
+    <div class="m-ft"><button class="btn pri" data-close>Got it</button></div>
+  </div></div>`;
+}
+
+/* ----- analytics ----- */
+function openAnalytics(){
+  const items = state.items;
+  const total = items.length;
+  const done = items.filter(i=>DONE.includes(i.status)).length;
+  const published = items.filter(i=>i.status==='published').length;
+  const pending = total - done;
+  const overdue = items.filter(isLate).length;
+  const upcoming = items.filter(i=>{ const d=daysUntil(i.deadline); return !DONE.includes(i.status) && d!==null && d>=0 && d<=9; }).length;
+  const rate = total ? Math.round(done/total*100) : 0;
+
+  const group = (label, colour, n) => ({label, colour, n});
+  const byBrand = state.brands.map(b=>group(b.name, b.colour, items.filter(i=>i.brandId===b.id).length))
+    .filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+  const byWho = ASSIGNEES.map(a=>group(a.name, a.hex, items.filter(i=>i.assignee===a.key).length)).filter(x=>x.n>0);
+  const byStatus = STATUSES.map(s=>group(s.label, s.hex, items.filter(i=>i.status===s.key).length)).filter(x=>x.n>0);
+
+  const bars = rows => { const max = Math.max(1, ...rows.map(r=>r.n));
+    return rows.length ? rows.map(r=>`<div class="bar"><span class="nm">${esc(r.label)}</span>
+      <span class="track"><span class="fill" style="width:${r.n/max*100}%;background:${r.colour}"></span></span>
+      <span class="vl">${r.n}</span></div>`).join('')
+    : `<div class="drophint">No content yet</div>`; };
+
+  const soon = byDeadline(items.filter(i=>{ const d=daysUntil(i.deadline); return !DONE.includes(i.status) && d!==null && d>=0; })).slice(0,6);
+
+  layer.innerHTML = `<div class="scrim"><div class="modal" style="max-width:900px">
+    <div class="m-hd"><div><h3>Analytics</h3><p>Live metrics across your 2026 calendar.</p></div>
+      <button class="x" data-close>✕</button></div>
+    <div class="m-bd">
+      <div class="stats">
+        <div class="stat"><span>Total content</span><b>${total}</b></div>
+        <div class="stat"><span>Completion</span><b>${rate}%</b></div>
+        <div class="stat"><span>Published</span><b>${published}</b></div>
+        <div class="stat"><span>Pending</span><b>${pending}</b></div>
+        <div class="stat"><span>Upcoming</span><b>${upcoming}</b></div>
+        <div class="stat"><span>Overdue</span><b style="${overdue?'color:#DC2626':''}">${overdue}</b></div>
+      </div>
+      <div class="panels">
+        <div class="panel"><h4>Content by brand</h4><p class="sub">How the year splits across the roster.</p>${bars(byBrand)}</div>
+        <div class="panel"><h4>Content by assignee</h4><p class="sub">Workload per person.</p>${bars(byWho)}</div>
+        <div class="panel"><h4>Completion rate</h4><p class="sub">Published and completed vs everything else.</p>
+          <div class="donut" style="background:conic-gradient(#16A34A 0 ${rate}%, #E2E8F0 ${rate}% 100%)">
+            <div><b>${rate}%</b><small>${done} of ${total || 0} done</small></div></div></div>
+        <div class="panel"><h4>Status breakdown</h4><p class="sub">Where each item sits in the pipeline.</p>${bars(byStatus)}</div>
+        <div class="panel" style="grid-column:1/-1"><h4>Upcoming deadlines</h4><p class="sub">Soonest first.</p>
+          ${soon.length ? `<table class="tbl"><thead><tr><th>Title</th><th>Assignee</th><th>Status</th><th style="text-align:right">Due</th></tr></thead>
+            <tbody>${soon.map(i=>{ const a=i.assignee?A[i.assignee]:null, st=S[i.status];
+              return `<tr><td><b>${esc(i.title)}</b> <small style="color:var(--faint)">${esc(i.brandName||'')}</small></td>
+                <td><span class="swatch" style="background:${a?a.hex:'#CBD5E1'};display:inline-block;margin-right:5px"></span>${a?a.name:'Unassigned'}</td>
+                <td><span class="badge" style="color:${st.hex};border-color:${st.hex}44;background:${st.hex}12">${st.label}</span></td>
+                <td style="text-align:right">${fmtLong(i.deadline)}</td></tr>`; }).join('')}</tbody></table>`
+          : `<div class="drophint">Nothing due in the near future.</div>`}
+        </div>
+      </div>
+    </div>
+    <div class="m-ft"><button class="btn" data-close>Close</button></div>
+  </div></div>`;
+}
+
+/* ---------------- global events ---------------- */
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-close]')) return closeLayer();
+  if(e.target.closest('[data-stop]')) return;
+  // The grip is a drag affordance only — clicking it must not open the drawer.
+  if(e.target.closest('[data-grip]')) return;
+
+  const add = e.target.closest('[data-add]');
+  if(add){ e.stopPropagation(); return openCreate(add.dataset.add); }
+
+  const create = e.target.closest('[data-create]');
+  if(create) return openCreate(create.dataset.create);
+
+  const tile = e.target.closest('.tile');
+  if(tile) return openDetails(tile.dataset.id);
+
+  const open = e.target.closest('[data-open]');
+  if(open) return openDetails(open.dataset.open);
+
+  const wk = e.target.closest('[data-day]');
+  if(wk) return openDay(wk.dataset.day);
+
+  const cell = e.target.closest('.cell');
+  if(cell) return openDay(cell.dataset.date);
+});
+
+document.addEventListener('change', e=>{
+  const st = e.target.closest('[data-quick-status]');
+  if(st){ const it = state.items.find(i=>i.id===st.dataset.quickStatus);
+    if(it){ it.status = st.value; it.updatedAt=Date.now(); save(); render(); } return; }
+  const wh = e.target.closest('[data-quick-assignee]');
+  if(wh){ const it = state.items.find(i=>i.id===wh.dataset.quickAssignee);
+    if(it){ it.assignee = wh.value || null; it.updatedAt=Date.now(); save(); render(); } }
+});
+
+document.getElementById('views').addEventListener('click', e=>{
+  const b = e.target.closest('[data-v]'); if(!b) return;
+  state.view = b.dataset.v; save(); render();
+});
+document.getElementById('prev').onclick = ()=>{
+  const d = parse(state.current);
+  state.current = key(state.view==='month' ? addMonths(d,-1) : addDays(d, state.view==='week'?-7:-1));
+  save(); render();
+};
+document.getElementById('next').onclick = ()=>{
+  const d = parse(state.current);
+  state.current = key(state.view==='month' ? addMonths(d,1) : addDays(d, state.view==='week'?7:1));
+  save(); render();
+};
+document.getElementById('today').onclick = ()=>{ state.current = todayKey(); save(); render(); };
+document.getElementById('btnNew').onclick = ()=>openCreate(state.current);
+document.getElementById('btnFilters').onclick = openFilters;
+document.getElementById('btnBell').onclick = openBell;
+document.getElementById('btnShare').onclick = openShare;
+document.getElementById('btnAnalytics').onclick = openAnalytics;
+document.getElementById('btnSave').onclick = ()=>{ if(save()) toast('All changes saved','ok'); };
+document.getElementById('btnUser').onclick = ()=>toast('Sign-in, roles and avatars live in the full Next.js app.');
+
+const q = document.getElementById('q');
+let qTimer = null;
+q.addEventListener('input', ()=>{ clearTimeout(qTimer); qTimer = setTimeout(()=>{ state.search = q.value; render(); }, 180); });
+document.getElementById('qClear').onclick = ()=>{ state.search=''; q.value=''; render(); };
+
+/* ---------------- boot ---------------- */
+load();
+if(!state.current) state.current = '2026-01-01';
+render();
+</script>
+</body>
+</html>

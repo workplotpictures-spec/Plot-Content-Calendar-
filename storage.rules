@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    /* Membership is resolved against exactly the same Firestore documents the
+       database rules use, so a viewer cannot upload and a non-member cannot
+       read a workspace's attachments by guessing an object path. */
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function memberPath(wid) {
+      return /databases/(default)/documents/workspaces/$(wid)/members/$(request.auth.uid);
+    }
+
+    function isMember(wid) {
+      return signedIn() && firestore.exists(memberPath(wid));
+    }
+
+    function canEdit(wid) {
+      return isMember(wid) && firestore.get(memberPath(wid)).data.role in ['admin', 'editor'];
+    }
+
+    function isAllowedType() {
+      return request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/.*')
+          || request.resource.contentType == 'application/pdf'
+          || request.resource.contentType == 'application/msword'
+          || request.resource.contentType ==
+               'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          || request.resource.contentType == 'application/vnd.ms-excel'
+          || request.resource.contentType ==
+               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    }
+
+    match /workspaces/{wid}/items/{itemId}/{fileName} {
+      allow read: if isMember(wid);
+
+      allow write: if canEdit(wid)
+                   && request.resource.size < 25 * 1024 * 1024
+                   && isAllowedType();
+
+      allow delete: if canEdit(wid);
+    }
+
+    /* Nothing else in the bucket is reachable from the client. */
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

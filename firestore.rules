@@ -1,0 +1,287 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ---------------------------------------------------------------
+       Helpers
+       --------------------------------------------------------------- */
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function memberDoc(wid) {
+      return get(/databases/$(database)/documents/workspaces/$(wid)/members/$(request.auth.uid));
+    }
+
+    function isMember(wid) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/workspaces/$(wid)/members/$(request.auth.uid));
+    }
+
+    function roleIn(wid) {
+      return memberDoc(wid).data.role;
+    }
+
+    function isAdmin(wid) {
+      return isMember(wid) && roleIn(wid) == 'admin';
+    }
+
+    /* Editors and admins may change content; viewers never may. */
+    function canEdit(wid) {
+      return isMember(wid) && roleIn(wid) in ['admin', 'editor'];
+    }
+
+    /* ---------------------------------------------------------------
+       Post-commit membership.
+
+       Rules see the state *before* a batch commits, so during workspace
+       creation the creator's own admin row does not exist yet and the seats
+       and brands written by the same batch would be refused. getAfter() reads
+       the state the batch will leave behind, which resolves that.
+
+       This is not a loophole: writing that admin row is itself gated on
+       getAfter(workspace).createdBy == request.auth.uid plus the workspace not
+       already existing, so the only way to satisfy these is to genuinely be
+       creating your own workspace, or to already be a member. For every write
+       outside a batch, "after" and "before" are the same document.
+
+       getAfter/existsAfter are only available to write rules, so reads keep
+       using the plain isMember() above.
+       --------------------------------------------------------------- */
+
+    function memberAfter(wid) {
+      return getAfter(
+        /databases/$(database)/documents/workspaces/$(wid)/members/$(request.auth.uid)
+      ).data;
+    }
+
+    function isMemberAfter(wid) {
+      return signedIn() && existsAfter(
+        /databases/$(database)/documents/workspaces/$(wid)/members/$(request.auth.uid)
+      );
+    }
+
+    function isAdminAfter(wid) {
+      return isMemberAfter(wid) && memberAfter(wid).role == 'admin';
+    }
+
+    function canEditAfter(wid) {
+      return isMemberAfter(wid) && memberAfter(wid).role in ['admin', 'editor'];
+    }
+
+    function isValidRole(r) {
+      return r in ['admin', 'editor', 'viewer'];
+    }
+
+    /* ---------------------------------------------------------------
+       users/{uid} — a person's own profile
+       --------------------------------------------------------------- */
+
+    match /users/{uid} {
+      /* Any signed-in user may read a profile: member lists and avatars in a
+         shared workspace need the display name and colour. */
+      allow read: if signedIn();
+      allow create: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    /* ---------------------------------------------------------------
+       invites/{token}
+       --------------------------------------------------------------- */
+
+    match /invites/{token} {
+      /* The token is a 128-bit random string and acts as the capability.
+         Reading one only reveals the workspace name and the offered role. */
+      allow get: if signedIn();
+
+      /* Listing is scoped to admins of the workspace being queried, so a
+         member of one workspace cannot enumerate invites for another. */
+      allow list: if signedIn() && isAdmin(resource.data.workspaceId);
+
+      allow create: if signedIn()
+                    && isAdmin(request.resource.data.workspaceId)
+                    && request.resource.data.createdBy == request.auth.uid
+                    && isValidRole(request.resource.data.role)
+                    && request.resource.data.token == token
+                    && request.resource.data.usedBy.size() == 0
+                    && request.resource.data.revoked == false
+                    && request.resource.data.expiresAt is number
+                    && request.resource.data.expiresAt > request.time.toMillis();
+
+      /* The only non-admin write allowed is a joiner appending their own uid
+         to usedBy — nothing else about the invite may change. */
+      allow update: if isAdmin(resource.data.workspaceId)
+                    || (
+                      signedIn()
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedBy'])
+                      && request.resource.data.usedBy.hasAll(resource.data.usedBy)
+                      && request.resource.data.usedBy.hasOnly(
+                           resource.data.usedBy.concat([request.auth.uid])
+                         )
+                    );
+
+      allow delete: if isAdmin(resource.data.workspaceId);
+    }
+
+    /* ---------------------------------------------------------------
+       workspaces/{wid}
+       --------------------------------------------------------------- */
+
+    match /workspaces/{wid} {
+      allow get, list: if isMember(wid);
+
+      /* Creating a workspace is open to any signed-in user; the batch that
+         creates it also writes the creator's admin member doc, which the
+         members rule below validates. */
+      allow create: if signedIn()
+                    && request.resource.data.createdBy == request.auth.uid
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.name.size() <= 120;
+
+      allow update: if isAdmin(wid);
+      allow delete: if isAdmin(wid);
+
+      /* -----------------------------------------------------------
+         members/{memberId}
+         ----------------------------------------------------------- */
+
+      match /members/{memberId} {
+
+        /* A member reads the roster of their own workspace.
+
+           The second clause lets anyone signed in look up their *own* row,
+           including when it does not exist yet — that is how the join flow
+           checks "am I already a member?" and how the app decides whether to
+           show the calendar or the not-a-member screen. It is keyed on the
+           document id rather than resource.data.uid on purpose: `resource` is
+           null for a missing document, so reading a field off it would error
+           and deny instead of returning "not found". */
+        allow get: if isMember(wid) || (signedIn() && memberId == request.auth.uid);
+
+        /* Listing the roster stays members-only. The collection-group rule at
+           the bottom of this file handles the "my workspaces" query. */
+        allow list: if isMember(wid)
+                    || (signedIn() && resource.data.uid == request.auth.uid);
+
+        allow create: if
+          /* 1. Bootstrapping: the creator makes themselves admin as part of
+                the same batch that creates the workspace. getAfter() reads the
+                post-commit state, so this only passes when that same batch
+                really does create the workspace under this user — it cannot be
+                used to pre-seed an admin row on a workspace someone else will
+                later create. */
+          (
+            signedIn()
+            && memberId == request.auth.uid
+            && request.resource.data.role == 'admin'
+            && request.resource.data.uid == request.auth.uid
+            && !exists(/databases/$(database)/documents/workspaces/$(wid))
+            && getAfter(/databases/$(database)/documents/workspaces/$(wid))
+                 .data.createdBy == request.auth.uid
+          )
+          /* 2. An admin adding somebody else, or an unclaimed roster seat. The
+                "after" form covers the seats written by the same batch that
+                creates the workspace.
+
+                memberId != uid is load-bearing: without it the row being
+                written would be the same row isAdminAfter() inspects, so
+                anyone could authorise themselves by writing role: 'admin'.
+                Self-creation only ever goes through path 1 or path 3. */
+          || (
+            memberId != request.auth.uid
+            && isAdminAfter(wid)
+            && isValidRole(request.resource.data.role)
+          )
+          /* 3. Redeeming an invite. The role is taken from the invite document
+                and re-checked here, so a joiner cannot promote themselves by
+                editing the request payload. */
+          || (
+            signedIn()
+            && memberId == request.auth.uid
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.seat == false
+            && inviteGrants(wid, request.resource.data.inviteToken, request.resource.data.role)
+          );
+
+        /* Role changes are admin-only. A member may correct their own display
+           name and colour but must not touch their role or uid. */
+        allow update: if isAdmin(wid)
+                      || (
+                        signedIn()
+                        && memberId == request.auth.uid
+                        && request.resource.data.diff(resource.data)
+                             .affectedKeys().hasOnly(['name', 'colour', 'colourName'])
+                      );
+
+        allow delete: if isAdmin(wid);
+      }
+
+      /* -----------------------------------------------------------
+         items / brands / goals — editors and admins write, viewers read
+         ----------------------------------------------------------- */
+
+      match /items/{itemId} {
+        allow get, list: if isMember(wid);
+        allow create: if canEditAfter(wid)
+                      && request.resource.data.createdBy == request.auth.uid
+                      && request.resource.data.title is string
+                      && request.resource.data.title.size() > 0
+                      && request.resource.data.title.size() <= 300;
+        allow update: if canEditAfter(wid);
+        allow delete: if canEdit(wid);
+      }
+
+      match /brands/{brandId} {
+        allow get, list: if isMember(wid);
+        allow create, update: if canEditAfter(wid);
+        allow delete: if canEdit(wid);
+      }
+
+      match /goals/{monthKey} {
+        allow get, list: if isMember(wid);
+        allow create, update: if canEditAfter(wid);
+        allow delete: if canEdit(wid);
+      }
+
+      /* -----------------------------------------------------------
+         presence — each member writes only their own heartbeat
+         ----------------------------------------------------------- */
+
+      match /presence/{presenceId} {
+        allow get, list: if isMember(wid);
+        allow write: if isMember(wid) && presenceId == request.auth.uid;
+      }
+    }
+
+    /* ---------------------------------------------------------------
+       Collection-group read for "which workspaces am I in?"
+       Matches only rows whose uid field is the caller's own.
+       --------------------------------------------------------------- */
+
+    match /{path=**}/members/{memberId} {
+      allow get, list: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    /* ---------------------------------------------------------------
+       Invite validation used by the members rule above.
+       --------------------------------------------------------------- */
+
+    function inviteGrants(wid, token, role) {
+      return token is string
+        && exists(/databases/$(database)/documents/invites/$(token))
+        && inviteData(token).workspaceId == wid
+        && inviteData(token).role == role
+        && inviteData(token).revoked == false
+        && inviteData(token).expiresAt > request.time.toMillis()
+        && (inviteData(token).singleUse == false || inviteData(token).usedBy.size() == 0);
+    }
+
+    function inviteData(token) {
+      return get(/databases/$(database)/documents/invites/$(token)).data;
+    }
+  }
+}
