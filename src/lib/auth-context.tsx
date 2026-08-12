@@ -20,17 +20,26 @@ import {
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { appUrl, auth, db, firebaseConfigured } from './firebase';
 import { AVATAR_COLOURS } from './constants';
-import { pickColour } from './utils';
+import { pickColour, safePath } from './utils';
 import type { UserDoc } from './types';
 
 const EMAIL_KEY = 'cc2026.signin.email';
+const NEXT_KEY = 'cc2026.signin.next';
+
+/** Reads the stored post-sign-in destination and clears it, so it is used once. */
+export function takeStoredNext(): string | null {
+  if (typeof window === 'undefined') return null;
+  const v = window.localStorage.getItem(NEXT_KEY);
+  window.localStorage.removeItem(NEXT_KEY);
+  return safePath(v);
+}
 
 interface AuthValue {
   user: User | null;
   profile: UserDoc | null;
   loading: boolean;
   configured: boolean;
-  sendLink: (email: string) => Promise<void>;
+  sendLink: (email: string, next?: string) => Promise<void>;
   completeLink: () => Promise<'signed-in' | 'no-link' | 'need-email'>;
   completeLinkWithEmail: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -85,15 +94,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const sendLink = useCallback(async (email: string) => {
+  const sendLink = useCallback(async (email: string, next?: string) => {
     const trimmed = email.trim();
+    // Where to land after sign-in has to survive the trip through the inbox, so
+    // it rides along on the continue URL. Without this an invited user comes
+    // back to a bare /login, gets sent to /, and — owning no workspace yet —
+    // is offered the "create a workspace" screen instead of the invite.
+    const target = safePath(next) ?? '/';
     await sendSignInLinkToEmail(auth, trimmed, {
-      url: `${appUrl()}/login`,
+      url: `${appUrl()}/login?next=${encodeURIComponent(target)}`,
       handleCodeInApp: true,
     });
     // Firebase needs the address back when the link is opened. Same browser is
     // the happy path; the login page asks again when it is a different one.
     window.localStorage.setItem(EMAIL_KEY, trimmed);
+    // Belt and braces: some mail clients and link scanners rewrite query
+    // strings, so keep a local copy of the destination too.
+    window.localStorage.setItem(NEXT_KEY, target);
   }, []);
 
   const completeLink = useCallback(async () => {

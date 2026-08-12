@@ -6,6 +6,16 @@ import type { Filters, Item, Member } from './types';
 export const uid = () =>
   Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
+/**
+ * Post-sign-in redirect targets arrive in a query string, so only same-site
+ * paths are allowed through — never a bare host or a protocol-relative "//evil".
+ */
+export function safePath(p: string | null | undefined): string | null {
+  if (!p) return null;
+  if (!p.startsWith('/') || p.startsWith('//')) return null;
+  return p;
+}
+
 export function bytes(n: number) {
   if (!n) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB'];
